@@ -1,44 +1,47 @@
-# 1. Запишите в файл формата CSV следующую информацию из JSON-файла `Amsterdam24.09.06.json`: 
-# Как ощущается температуру _(feels_like)_ и какие погодные условия _(condition)_ в Амстердаме по часам?
-
-# 2. Запишите в файл формата TXT следующую информацию из JSON-файла `Berlin24.09.06.json`: 
-# Какая средняя, максимальная и минимальные температуры _(temp_avg, temp_max, temp_min)_ утром, днем, вечером, ночью в Берлине?
-
-# 3. Запишите в файл формата TXT следующую информацию из JSON-файла `Moscow24.09.06.json`: 
-# Какое фактическое состояние погоды _(fact)_ в Москве 07.09.2024?
-
-# 4. Запишите в файл формата CSV следующую информацию из JSON-файла `Rome24.09.06.json`: 
-# Таблица дат _(date)_, время восхода солнца _(sunrise)_ и заката _(sunset)_ в Риме.
-
-# 5. Запишите в файл формата CSV следующую информацию из JSON-файла `Saint-Petersburg24.09.06.json`: 
-# Какие погодные условия и атмосферное давление _(pressure_mm)_ по часам в Санкт-Петербурге 08.09.2024
-
-# 6. Запишите в файл формата TXT следующую информацию из JSON-файла `Sochi24.09.06.json`: 
+# 6. Запишите в файл формата TXT следующую информацию из JSON-файла `Sochi24.09.06.json`:
 # Какие направления ветра _(wind_dir)_ встречались в данных о погоде в Сочи? Посчитайте количество каждого типа.
 
-# 7. Запишите в файл формата TXT следующую информацию из JSON-файла `events.json`: 
-# Какого формата мероприятия были запланированы? Посчитайте количество каждого типа.
+import json
+from collections import Counter
 
-# 8. Запишите в файл формата CSV следующую информацию из JSON-файла `events.json`: 
-# Таблица ссылок на стажировки _(link)_ и названий компаний _(company)_.
+path_data_text = 'data/Sochi24.09.06.json'
+file_results = 'results.txt'
 
-# 9. Запишите в файл формата TXT следующую информацию из CSV-файла `sales2019.csv`: 
-# Посчитайте сумму прибыли _(sale_profit)_ за 2019 год.
 
-# 10. Запишите в файл формата JSON следующую информацию из CSV-файла `crypto_intraday_5min_ETH_USD.csv`: 
-# Посчитайте за каждый час _(open)_ суммарное количество торгуемых токенов _(volume)_ на бирже.
+def main():
+    with open(path_data_text, 'r') as f:
+        data = json.load(f)
 
-# 11. Запишите в файл формата JSON следующую информацию из CSV-файла `fx_daily_EUR_USD.csv`: 
-# Посчитайте за каждый месяц среднюю цену закрытия валютных торгов _(close)_.
+    target_key = 'wind_dir'
 
-# 12. Запишите в файл формата TXT следующую информацию из CSV-файла `fx_weekly_EUR_USD.csv`: 
-# Посчитайте за каждый год максимальную цену открытия и максимальную цену закрытия валютных торгов
+    list_wind_dir = get_values_by_key(data, target_key)
 
-# 13. Запишите в файл формата TXT следующую информацию из CSV-файла `weekly_IBM.csv`: 
-# Посчитайте количество строк в таблице.
+    count = Counter(list_wind_dir)
 
-# 14. Запишите в файл формата JSON следующую информацию из YAML-файла `mkdocs.yml`: 
-# Найдите информацию о ссылках на социальные сети в блоке `social`.
+    with open(file_results, 'w', encoding='utf-8') as file:
+        for key, value in count.items():
+            file.write(f"{key}: {value}\n")
 
-# 15. Запишите в файл формата CSV следующую информацию из YAML-файла `gitlab-ci.yml`: 
-# Посчитайте количество состояний `stage` каждого типа, которые встречаются в файле.
+    print(f"all wind_dir '{target_key}' all counts: {len(list_wind_dir)}, data: {list_wind_dir}.")
+
+    pass
+
+def get_values_by_key(data, target_key):
+    values = []
+
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key == target_key:
+                values.append(value)
+            values.extend(get_values_by_key(value, target_key))
+    elif isinstance(data, list):
+        for item in data:
+            values.extend(get_values_by_key(item, target_key))
+
+    return values
+
+def count_group_winds(lst, unique):
+    return list(map(lambda x: (x, lst.count(x)), unique))
+
+if __name__ == "__main__":
+    main()
